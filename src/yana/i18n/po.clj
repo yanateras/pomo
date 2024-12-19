@@ -1,4 +1,4 @@
-(ns yana.data.po
+(ns yana.i18n.po
   "gettext PO reader/writer.
 
   This module represents a PO file as a map where keys are original strings,
