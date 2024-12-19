@@ -24,8 +24,8 @@
       (kern/return [k (str/join v)]))))
 
 (defn read-string [s]
-  (into (array-map)
-        (kern/value (kern/many po-parser) s)))
+  (apply array-map
+         (sequence cat (kern/value (kern/many po-parser) s))))
 
 (def ^:private po-format
   "msgid \"%s\"
