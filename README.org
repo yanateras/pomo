@@ -1,0 +1,44 @@
+* ~yana.i18n.po~
+
+gettext PO reader/writer for Clojure.
+
+** Usage
+
+- ~(read-string s)~
+
+  Reads PO from a string into a map.
+
+  Preserves the original order.
+
+- ~(write-string m)~
+
+  Writes PO from a map into a string.
+
+*** Example
+
+#+BEGIN_SRC clojure
+(ns yana.i18n.po.example
+  (:require [clojure.java.io :as io]
+            [clojure.string :as str]
+            [yana.i18n.po :as po]))
+
+(def resource-path
+  (str/replace (str *ns*) "." "/"))
+
+(defn resource [n]
+  (io/resource (str resource-path "/" n)))
+
+(def locale-id "en-CA")
+
+(def locale-po (resource (str locale-id ".po")))
+
+(def locale (po/read-string (slurp locale-po)))
+
+(defn _ [s1]
+  (if-let [s2 (locale s1)]
+    s2
+    s1))
+
+(defn -main []
+  (println (_ "gray")))
+#+END_SRC

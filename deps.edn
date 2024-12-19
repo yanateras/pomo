@@ -1,2 +1,2 @@
 {:deps {org.blancas/kern {:mvn/version "1.1.0"}}
- :paths ["src"]}
+ :paths ["src" "res"]}
