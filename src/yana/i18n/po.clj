@@ -1,8 +1,8 @@
 (ns yana.i18n.po
   "gettext PO reader/writer.
 
-  This module represents a PO file as a map where keys are original strings,
-  and values are the corresponding translations."
+  PO files are represented as a map where keys are contexts, and values
+  are maps between original strings and their translations."
   (:refer-clojure :exclude [read-string])
   (:require [blancas.kern.core :as kern]
             [blancas.kern.lexer :as lex]
@@ -24,8 +24,8 @@
       (kern/return [k (str/join v)]))))
 
 (defn read-string [s]
-  (apply array-map
-         (sequence cat (kern/value (kern/many po-parser) s))))
+  {nil (apply array-map
+              (sequence cat (kern/value (kern/many po-parser) s)))})
 
 (def ^:private po-format
   "msgid \"%s\"
@@ -34,4 +34,4 @@ msgstr \"%s\"
 ")
 
 (defn write-string [m]
-  (str/join (map (partial apply format po-format) m)))
+  (str/join (map (partial apply format po-format) (m nil))))
