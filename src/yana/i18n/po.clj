@@ -1,8 +1,8 @@
 (ns yana.i18n.po
   "gettext PO reader/writer.
 
-  PO files are represented as a map where keys are contexts, and values
-  are maps between original strings and their translations."
+  PO is represented as a map where keys are contexts, and values are maps
+  between original strings and their translations."
   (:refer-clojure :exclude [read-string])
   (:require [blancas.kern.core :as kern]
             [blancas.kern.lexer :as lex]
