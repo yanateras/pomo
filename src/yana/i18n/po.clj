@@ -13,7 +13,7 @@
 (s/def ::id string?)
 (s/def ::str string?)
 
-(s/def ::map
+(s/def ::po
   (s/map-of ::ctxt (s/map-of ::id ::str)))
 
 (def ^:private po-style
@@ -45,7 +45,7 @@
 
 (s/fdef read-string
   :args (s/cat :s string?)
-  :ret ::map)
+  :ret ::po)
 
 (def ^:private po-format-with-ctxt
   "msgctxt \"%s\"
@@ -69,5 +69,5 @@ msgstr \"%s\"
          (format po-format i s)))))
 
 (s/fdef write-string
-  :args (s/cat :m ::map)
+  :args (s/cat :m ::po)
   :ret string?)
