@@ -1,4 +1,4 @@
-(ns yana.i18n.po
+(ns yana.pomo.po
   "gettext PO reader/writer.
 
   PO is represented as a map where keys are contexts, and values are maps
@@ -7,14 +7,10 @@
   (:require [blancas.kern.core :as kern]
             [blancas.kern.lexer :as lex]
             [clojure.spec.alpha :as s]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [yana.pomo :as pomo]))
 
-(s/def ::ctxt (s/nilable string?))
-(s/def ::id string?)
-(s/def ::str string?)
-
-(s/def ::po
-  (s/map-of ::ctxt (s/map-of ::id ::str)))
+(set! *warn-on-reflection* true)
 
 (def ^:private po-style
   (assoc lex/basic-def :comment-line "#"))
@@ -45,29 +41,4 @@
 
 (s/fdef read-string
   :args (s/cat :s string?)
-  :ret ::po)
-
-(def ^:private po-format-with-ctxt
-  "msgctxt \"%s\"
-msgid \"%s\"
-msgstr \"%s\"
-
-")
-
-(def ^:private po-format
-  "msgid \"%s\"
-msgstr \"%s\"
-
-")
-
-(defn write-string [m]
-  (str/join
-     (for [[c is] m
-           [i s] is]
-       (if c
-         (format po-format-with-ctxt c i s)
-         (format po-format i s)))))
-
-(s/fdef write-string
-  :args (s/cat :m ::po)
-  :ret string?)
+  :ret ::pomo/catalog)
