@@ -1,8 +1,5 @@
 (ns yana.pomo.po
-  "gettext PO reader/writer.
-
-  PO is represented as a map where keys are contexts, and values are maps
-  between original strings and their translations."
+  "gettext PO reader."
   (:refer-clojure :exclude [read-string])
   (:require [blancas.kern.core :as kern]
             [blancas.kern.lexer :as lex]
@@ -33,7 +30,9 @@
                    (kern/many string-lit))]
                (kern/return (map #(if % (str/join %)) [c i s])))))
 
-(defn read-string [s]
+(defn read-string
+  "Reads a PO from a string and returns a catalog."
+  [s]
   (reduce (fn [m [c i s]]
             (assoc-in m [c i] s))
           {}
