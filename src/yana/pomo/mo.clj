@@ -3,33 +3,34 @@
   (:refer-clojure :exclude [read read-string])
   (:require [clojure.spec.alpha :as s]
             [yana.pomo :as pomo])
-  (:import (java.io ByteArrayInputStream DataInputStream InputStream)
-           (java.nio ByteOrder)))
+  (:import (java.io ByteArrayInputStream DataInputStream InputStream)))
 
 (set! *warn-on-reflection* true)
 
 (defn- read-unsigned-int
   ([^DataInputStream in]
-   (read-unsigned-int in ByteOrder/BIG_ENDIAN))
-  ([^DataInputStream in ^ByteOrder endian]
+   (read-unsigned-int in :be))
+  ([^DataInputStream in endian]
    (let [n (.readInt in)]
      (Integer/toUnsignedLong
-      (condp = endian
-        ByteOrder/BIG_ENDIAN n
-        ByteOrder/LITTLE_ENDIAN (Integer/reverseBytes n))))))
+      (case endian
+        :be n
+        :le (Integer/reverseBytes n))))))
 
-(def ^:const ^:private magic-be (long 0x950412de))
-(def ^:const ^:private magic-le (long 0xde120495))
+(def ^:const ^:private magic-be 0x950412de)
+(def ^:const ^:private magic-le 0xde120495)
+
+(defn- magic->endian [magic]
+  (case magic
+    0x950412de :be
+    0xde120495 :le
+    (throw (ex-info "Invalid MO magic number"
+                    {:actual magic
+                     :expected #{magic-be magic-le}}))))
 
 (defn- read-header [^DataInputStream in]
   (let [magic (read-unsigned-int in)
-        endian (condp = magic
-                 magic-be ByteOrder/BIG_ENDIAN
-                 magic-le ByteOrder/LITTLE_ENDIAN
-                 (throw
-                  (ex-info "Invalid MO magic number"
-                           {:actual magic
-                            :expected #{magic-be magic-le}})))]
+        endian (magic->endian magic)]
     {:endian endian
      :revision (read-unsigned-int in endian)
      :entry-count (read-unsigned-int in endian)
@@ -40,7 +41,7 @@
 
 (defrecord ^:private Entry [length offset])
 
-(defn- read-entry [^DataInputStream in ^ByteOrder endian]
+(defn- read-entry [^DataInputStream in endian]
   (Entry. (read-unsigned-int in endian)
           (read-unsigned-int in endian)))
 
@@ -61,11 +62,8 @@
     (.read in bs)
     (String. bs "UTF-8")))
 
-(defn read
-  "Reads a MO from an input stream and returns a catalog."
-  [^InputStream in]
-  (let [in (DataInputStream. in)
-        {:keys [endian
+(defn- read-data [^DataInputStream in]
+  (let [{:keys [endian
                 entry-count
                 id-table-offset
                 str-table-offset]} (read-header in)
@@ -88,6 +86,11 @@
         strs (for [str-entry str-entries]
                (read-string in str-entry))]
     {nil (zipmap ids strs)}))
+
+(defn read
+  "Reads a MO from an input stream and returns a catalog."
+  [^InputStream in]
+  (read-data (DataInputStream. in)))
 
 (def ^:private input-stream?
   (partial instance? InputStream))
